@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration - Zhejiang Community Charity Events</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a id="back-to-details-link" href="index.html" class="back-link">&larr; Back to Event Details</a>
+            <h1>Event Registration Form</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="form-card" style="max-width: 600px; margin: 30px auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 id="event-title-display">Registering for Event...</h2>
+            <p id="feedback-msg" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 4px;"></p>
+
+            <form id="registration-form">
+                <!-- Hidden Event ID Field -->
+                <input type="hidden" id="event_id" name="event_id" value="">
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="user_name" style="display: block; font-weight: bold; margin-bottom: 5px;">Full Name *</label>
+                    <input type="text" id="user_name" name="user_name" required placeholder="e.g. John Doe" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="user_email" style="display: block; font-weight: bold; margin-bottom: 5px;">Email Address *</label>
+                    <input type="email" id="user_email" name="user_email" required placeholder="e.g. johndoe@example.com" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="contact_number" style="display: block; font-weight: bold; margin-bottom: 5px;">Contact Phone Number *</label>
+                    <input type="tel" id="contact_number" name="contact_number" required placeholder="e.g. 0412345678" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="tickets_purchased" style="display: block; font-weight: bold; margin-bottom: 5px;">Number of Tickets *</label>
+                    <input type="number" id="tickets_purchased" name="tickets_purchased" min="1" max="10" value="1" required style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <button type="submit" id="submit-btn" style="width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                    Submit Registration
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Zhejiang Community Charity Events Platform | PROG2002 Assessment 3</p>
+    </footer>
+
+    <script src="registration.js"></script>
+</body>
+</html>
