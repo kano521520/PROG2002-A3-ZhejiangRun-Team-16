@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zhejiang Community Charity Events</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Brand Header & Hero Banner -->
+    <header class="hero-banner">
+        <div class="hero-content">
+            <span class="hero-tag">🏃 Zhejiang Hope Run 2026</span>
+            <h1>Zhejiang Community Charity Events</h1>
+            <p>Run together for hope, health, and a better community across Zhejiang Province.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search and Filter Section -->
+        <section class="filter-section">
+            <div class="filter-card">
+                <div class="filter-group">
+                    <label for="search-location">🔍 Search Location</label>
+                    <input type="text" id="search-location" placeholder="e.g., Hangzhou, Ningbo, West Lake..." />
+                </div>
+
+                <div class="filter-group">
+                    <label for="category-select">🏷️ Event Category</label>
+                    <select id="category-select">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+
+                <button id="btn-reset" class="btn-secondary">Reset Filters</button>
+            </div>
+        </section>
+
+        <!-- Events Grid Section -->
+        <section class="events-section">
+            <div class="section-header">
+                <h2>Upcoming Charity Runs</h2>
+                <span id="event-count-badge" class="count-badge">Loading...</span>
+            </div>
+            <div id="events-grid" class="events-grid">
+                <!-- Dynamically populated by main.js -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Zhejiang Community Charity Events Platform | PROG2002 Assessment 2</p>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
