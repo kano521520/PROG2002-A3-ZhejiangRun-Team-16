@@ -36,12 +36,15 @@ function initDatabase() {
             CREATE TABLE registrations (
                 registration_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 event_id INTEGER NOT NULL,
-                user_name TEXT NOT NULL,
+                -- COLLATE NOCASE: "Zhang San", "zhang san" and "ZHANG SAN" are the same participant
+                user_name TEXT NOT NULL COLLATE NOCASE,
                 user_email TEXT NOT NULL,
                 contact_number TEXT NOT NULL,
                 tickets_purchased INTEGER DEFAULT 1,
                 registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
+                FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE,
+                -- A3 rule: one participant name may only register once per event
+                UNIQUE (event_id, user_name)
             )
         `, (err) => {
             if (err) {
@@ -69,6 +72,28 @@ function initDatabase() {
             }
         });
     });
+}
+
+// ---------------------------------------------------------------------------
+// Duplicate participant name helpers (A3 rule)
+// The same participant name may only be registered once for the same event.
+// ---------------------------------------------------------------------------
+
+// Standard message returned whenever a duplicate participant name is submitted
+function duplicateNameError(userName) {
+    return `"${String(userName).trim()}" has already registered for this event. The same name can only be registered once per event.`;
+}
+
+// Look up an existing registration of the same name in the same event.
+// The comparison ignores letter case, so "Zhang San" and "zhang san" are the same participant.
+function findExistingRegistration(eventId, userName, callback) {
+    const sql = `
+        SELECT registration_id, user_name, user_email
+        FROM registrations
+        WHERE event_id = ? AND user_name = ? COLLATE NOCASE
+        LIMIT 1
+    `;
+    db.get(sql, [eventId, String(userName).trim()], callback);
 }
 
 // GET /api/categories - Retrieve all categories
@@ -161,19 +186,70 @@ app.post('/api/registrations', (req, res) => {
         });
     }
 
-    const sql = `
-        INSERT INTO registrations (event_id, user_name, user_email, contact_number, tickets_purchased, registration_date)
-        VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
-    `;
-    const params = [event_id, user_name, user_email, contact_number, tickets_purchased];
+    // A3 rule: the same participant name may only be registered once for this event
+    findExistingRegistration(event_id, user_name, (lookupErr, existingRegistration) => {
+        if (lookupErr) {
+            return res.status(500).json({ error: lookupErr.message });
+        }
 
-    db.run(sql, params, function (err) {
+        if (existingRegistration) {
+            return res.status(409).json({
+                error: duplicateNameError(user_name),
+                duplicate: true,
+                registration_id: existingRegistration.registration_id
+            });
+        }
+
+        const sql = `
+            INSERT INTO registrations (event_id, user_name, user_email, contact_number, tickets_purchased, registration_date)
+            VALUES (?, ?, ?, ?, ?, datetime('now', 'localtime'))
+        `;
+        const params = [
+            event_id,
+            String(user_name).trim(),
+            String(user_email).trim(),
+            String(contact_number).trim(),
+            tickets_purchased
+        ];
+
+        db.run(sql, params, function (err) {
+            if (err) {
+                // Safety net: the UNIQUE (event_id, user_name) constraint also blocks duplicates
+                if (err.code === 'SQLITE_CONSTRAINT' || /UNIQUE/i.test(err.message)) {
+                    return res.status(409).json({
+                        error: duplicateNameError(user_name),
+                        duplicate: true
+                    });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+            res.status(201).json({
+                message: 'Registration submitted successfully',
+                registration_id: this.lastID
+            });
+        });
+    });
+});
+
+// GET /api/registrations/check - Check whether a participant name is already used in an event
+// Example: /api/registrations/check?event_id=1&user_name=Zhang%20San
+app.get('/api/registrations/check', (req, res) => {
+    const { event_id, user_name } = req.query;
+
+    if (!event_id || !user_name) {
+        return res.status(400).json({ error: 'Both event_id and user_name query parameters are required.' });
+    }
+
+    findExistingRegistration(event_id, user_name, (err, existingRegistration) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        res.status(201).json({
-            message: 'Registration submitted successfully',
-            registration_id: this.lastID
+
+        res.json({
+            event_id: Number(event_id),
+            user_name: String(user_name).trim(),
+            duplicate: Boolean(existingRegistration),
+            registration_id: existingRegistration ? existingRegistration.registration_id : null
         });
     });
 });

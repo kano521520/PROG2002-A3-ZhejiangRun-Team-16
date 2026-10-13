@@ -34,6 +34,9 @@ CREATE TABLE `registrations` (
   `contact_number` VARCHAR(20) NOT NULL,
   `tickets_purchased` INT NOT NULL DEFAULT 1,
   `registration_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  -- A3 rule: one participant name may only register once per event.
+  -- The default utf8mb4 collation already compares text without letter case.
+  UNIQUE KEY `uq_event_user_name` (`event_id`, `user_name`),
   FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
