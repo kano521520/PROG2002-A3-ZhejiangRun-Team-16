@@ -138,6 +138,76 @@ body {
     background-color: #dbe8ff;
 }
 
+/* Event Management (add / delete events) */
+.admin-section {
+    margin-bottom: 30px;
+}
+
+.admin-card {
+    background-color: var(--white);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+}
+
+.admin-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--blue-dark);
+    margin-bottom: 14px;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+}
+
+/* The grid already provides the spacing, so no extra margin is needed here */
+.admin-grid .form-group {
+    margin-bottom: 0;
+}
+
+.admin-grid .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.admin-card .form-group select,
+.admin-card .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--text);
+    background-color: var(--white);
+    border: 1px solid var(--blue-border);
+    border-radius: 6px;
+}
+
+.admin-card .form-group select:focus,
+.admin-card .form-group textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px var(--blue-light);
+}
+
+.admin-card .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.admin-actions .form-hint {
+    margin-top: 0;
+}
+
 /* Section Header */
 .section-header {
     display: flex;
@@ -227,10 +297,27 @@ body {
 }
 
 .card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     margin-top: auto;
     padding-top: 14px;
     border-top: 1px solid var(--blue-light);
-    text-align: right;
+}
+
+.reg-count {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-grey);
+}
+
+.card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
 }
 
 .btn-view-details {
@@ -358,7 +445,18 @@ body {
 
 /* Buttons */
 .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
     margin: 24px 0;
+}
+
+/* Inline note / error shown next to the delete button on the details page */
+.action-buttons .error-msg,
+.action-buttons .form-hint {
+    padding: 0;
+    font-size: 0.9rem;
 }
 
 .btn,
@@ -378,6 +476,30 @@ body {
 .btn:hover,
 .btn-primary:hover {
     background-color: var(--blue-dark);
+}
+
+/* Delete button: only clickable while an event has no registrations */
+.btn-delete {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #b3261e;
+    background-color: #fdecea;
+    border: 1px solid #f5c6c2;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-delete:hover:not(:disabled) {
+    background-color: #fbd5d2;
+}
+
+.btn-delete:disabled {
+    color: #9aa7b4;
+    background-color: #f1f4f8;
+    border-color: #dfe6ee;
+    cursor: not-allowed;
 }
 
 /* Current Registrations Table */

@@ -111,7 +111,8 @@ app.get('/api/categories', (req, res) => {
 app.get('/api/events', (req, res) => {
     const { category_id, location } = req.query;
     let sql = `
-        SELECT e.*, c.category_name 
+        SELECT e.*, c.category_name,
+               (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.event_id) AS registration_count
         FROM events e 
         LEFT JOIN categories c ON e.category_id = c.category_id
         WHERE 1=1
@@ -168,9 +169,134 @@ app.get('/api/events/:id', (req, res) => {
                 return res.status(500).json({ error: err.message });
             }
 
+            const registrations = regRows || [];
+
             res.json({
                 ...eventRow,
-                registrations: regRows || []
+                // Used by the UI to show the number of registrations and to allow / block deletion
+                registration_count: registrations.length,
+                registrations
+            });
+        });
+    });
+});
+
+// POST /api/events - Create a new charity event (A3 New)
+app.post('/api/events', (req, res) => {
+    const { title, category_id, location, date, description, image_url, organizer } = req.body || {};
+
+    // title, location and date are the required columns of the events table
+    if (!title || !String(title).trim() || !location || !String(location).trim() || !date || !String(date).trim()) {
+        return res.status(400).json({
+            error: 'The fields title, location and date are required.'
+        });
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date).trim())) {
+        return res.status(400).json({ error: 'The date must use the YYYY-MM-DD format.' });
+    }
+
+    if (category_id !== undefined && category_id !== null && category_id !== '' && !/^\d+$/.test(String(category_id))) {
+        return res.status(400).json({ error: 'category_id must be a number.' });
+    }
+
+    const insertEvent = () => {
+        const sql = `
+            INSERT INTO events (title, category_id, location, date, description, image_url, organizer)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const params = [
+            String(title).trim(),
+            category_id ? Number(category_id) : null,
+            String(location).trim(),
+            String(date).trim(),
+            description ? String(description).trim() : null,
+            image_url ? String(image_url).trim() : null,
+            organizer ? String(organizer).trim() : null
+        ];
+
+        db.run(sql, params, function (err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+
+            const createdId = this.lastID;
+
+            db.get(
+                `SELECT e.*, c.category_name
+                 FROM events e
+                 LEFT JOIN categories c ON e.category_id = c.category_id
+                 WHERE e.event_id = ?`,
+                [createdId],
+                (selectErr, row) => {
+                    if (selectErr) {
+                        return res.status(500).json({ error: selectErr.message });
+                    }
+
+                    res.status(201).json({
+                        message: 'Event created successfully',
+                        registration_count: 0,
+                        ...row
+                    });
+                }
+            );
+        });
+    };
+
+    // When a category is chosen it has to exist in the categories table
+    if (category_id) {
+        db.get('SELECT category_id FROM categories WHERE category_id = ?', [category_id], (err, row) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            if (!row) {
+                return res.status(400).json({ error: `Unknown category_id: ${category_id}` });
+            }
+            insertEvent();
+        });
+        return;
+    }
+
+    insertEvent();
+});
+
+// DELETE /api/events/:id - Delete an event (A3 New)
+// Rule: an event that already has registrations must NOT be deleted directly
+app.delete('/api/events/:id', (req, res) => {
+    const eventId = req.params.id;
+
+    db.get('SELECT event_id, title FROM events WHERE event_id = ?', [eventId], (err, eventRow) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (!eventRow) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        db.get('SELECT COUNT(*) AS total FROM registrations WHERE event_id = ?', [eventId], (countErr, countRow) => {
+            if (countErr) {
+                return res.status(500).json({ error: countErr.message });
+            }
+
+            const registrationCount = countRow ? countRow.total : 0;
+
+            // Block the deletion while the event still has participants
+            if (registrationCount > 0) {
+                return res.status(409).json({
+                    error: `"${eventRow.title}" cannot be deleted because it already has ${registrationCount} registration(s). Please remove those registrations first.`,
+                    registration_count: registrationCount
+                });
+            }
+
+            db.run('DELETE FROM events WHERE event_id = ?', [eventId], function (deleteErr) {
+                if (deleteErr) {
+                    return res.status(500).json({ error: deleteErr.message });
+                }
+
+                res.json({
+                    message: `Event "${eventRow.title}" was deleted successfully.`,
+                    event_id: Number(eventId)
+                });
             });
         });
     });

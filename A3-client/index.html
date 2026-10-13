@@ -38,6 +38,66 @@
                 </div>
             </section>
 
+            <!-- Event Management Section: add new events / delete events without registrations -->
+            <section class="admin-section">
+                <div class="section-header">
+                    <h2>Event Management</h2>
+                    <span class="count-badge">Add a new event, or delete an event that has no registrations</span>
+                </div>
+
+                <div class="admin-card">
+                    <h3 class="admin-card-title">Add a New Charity Event</h3>
+                    <p id="admin-feedback" class="form-response-msg" hidden></p>
+
+                    <form id="add-event-form">
+                        <div class="admin-grid">
+                            <div class="form-group">
+                                <label for="new-title">Event Title <span class="required">*</span></label>
+                                <input type="text" id="new-title" name="title" required placeholder="e.g. Hangzhou Riverside 5K Run">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-category">Category</label>
+                                <select id="new-category" name="category_id">
+                                    <option value="">No category</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-location">Location <span class="required">*</span></label>
+                                <input type="text" id="new-location" name="location" required placeholder="e.g. Hangzhou, West Lake">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-date">Event Date <span class="required">*</span></label>
+                                <input type="date" id="new-date" name="date" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-organizer">Organizer</label>
+                                <input type="text" id="new-organizer" name="organizer" placeholder="e.g. Hangzhou Sports Foundation">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="new-image">Image URL</label>
+                                <input type="url" id="new-image" name="image_url" placeholder="https://images.unsplash.com/...">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="new-description">Description</label>
+                                <textarea id="new-description" name="description" rows="3" placeholder="A short introduction of this community charity run..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="admin-actions">
+                            <button type="submit" id="add-event-btn" class="btn btn-primary">Add Event</button>
+                            <button type="reset" class="btn-secondary">Clear Form</button>
+                            <span class="form-hint">Events that already have registrations cannot be deleted.</span>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
             <!-- Events Grid Section -->
             <section class="events-section">
                 <div class="section-header">

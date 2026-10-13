@@ -7,6 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReset = document.getElementById('btn-reset');
     const countBadge = document.getElementById('event-count-badge');
 
+    // Event management (add / delete) elements
+    const adminForm = document.getElementById('add-event-form');
+    const adminFeedback = document.getElementById('admin-feedback');
+    const addEventBtn = document.getElementById('add-event-btn');
+    const newCategorySelect = document.getElementById('new-category');
+
+    // Fallback image used when an event has no image_url
+    const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?auto=format&fit=crop&w=800&q=80';
+
     // Initial Data Fetch
     loadCategories();
     loadEvents();
@@ -28,19 +37,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Fetch All Categories for Dropdown
+    // Add event form (POST /api/events)
+    if (adminForm) {
+        adminForm.addEventListener('submit', handleAddEvent);
+    }
+
+    // Delete buttons are delegated because the cards are re-rendered on every reload
+    if (eventsGrid) {
+        eventsGrid.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.btn-delete');
+            if (!deleteBtn || deleteBtn.disabled) return;
+            deleteEvent(deleteBtn.dataset.deleteId, deleteBtn.dataset.deleteTitle);
+        });
+    }
+
+    // Fetch All Categories for Dropdowns (filter + add event form)
     function loadCategories() {
         fetch(`${API_BASE_URL}/categories`)
             .then(res => res.json())
             .then(categories => {
+                const options = categories
+                    .map(cat => `<option value="${cat.category_id}">${escapeHtml(cat.category_name)}</option>`)
+                    .join('');
+
                 if (categorySelect) {
-                    categorySelect.innerHTML = '<option value="">All Categories</option>';
-                    categories.forEach(cat => {
-                        const opt = document.createElement('option');
-                        opt.value = cat.category_id;
-                        opt.textContent = cat.category_name;
-                        categorySelect.appendChild(opt);
-                    });
+                    categorySelect.innerHTML = `<option value="">All Categories</option>${options}`;
+                }
+
+                if (newCategorySelect) {
+                    newCategorySelect.innerHTML = `<option value="">No category</option>${options}`;
                 }
             })
             .catch(err => console.error('Error loading categories:', err));
@@ -86,26 +111,136 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!events || events.length === 0) {
-            eventsGrid.innerHTML = '<p class="no-results-msg">No charity events found matching your search criteria.</p>';
+            eventsGrid.innerHTML = '<p class="no-results-msg">No charity events found matching your search criteria. Use the Event Management section above to add one.</p>';
             return;
         }
 
-        eventsGrid.innerHTML = events.map(event => `
+        eventsGrid.innerHTML = events.map(event => {
+            const registrationCount = Number(event.registration_count) || 0;
+
+            // Events with registrations are locked, events without registrations can be deleted
+            const deleteButton = registrationCount > 0
+                ? `<button class="btn-delete" type="button" disabled title="This event already has registrations and cannot be deleted">Delete</button>`
+                : `<button class="btn-delete" type="button" data-delete-id="${event.event_id}" data-delete-title="${escapeHtml(event.title)}">Delete</button>`;
+
+            return `
             <div class="event-card">
                 <div class="card-image-wrapper">
-                    <span class="category-badge-floating">${event.category_name || 'Charity Run'}</span>
-                    <img src="${event.image_url}" alt="${event.title}" class="card-image" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?auto=format&fit=crop&w=800&q=80';" />
+                    <span class="category-badge-floating">${escapeHtml(event.category_name || 'Charity Run')}</span>
+                    <img src="${escapeHtml(event.image_url || DEFAULT_IMAGE)}" alt="${escapeHtml(event.title)}" class="card-image" onerror="this.onerror=null; this.src='${DEFAULT_IMAGE}';" />
                 </div>
                 <div class="card-body">
-                    <h3 class="card-title">${event.title}</h3>
-                    <div class="card-info">Location: ${event.location}</div>
-                    <div class="card-info">Date: ${event.date}</div>
+                    <h3 class="card-title">${escapeHtml(event.title)}</h3>
+                    <div class="card-info">Location: ${escapeHtml(event.location)}</div>
+                    <div class="card-info">Date: ${escapeHtml(event.date)}</div>
                     <div class="card-footer">
-                        <a href="details.html?id=${event.event_id}" class="btn-view-details">View Details &rarr;</a>
+                        <span class="reg-count">${registrationCount} registration${registrationCount !== 1 ? 's' : ''}</span>
+                        <div class="card-actions">
+                            <a href="details.html?id=${event.event_id}" class="btn-view-details">View Details &rarr;</a>
+                            ${deleteButton}
+                        </div>
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
+    }
+
+    // Create a new event through POST /api/events
+    function handleAddEvent(e) {
+        e.preventDefault();
+
+        const payload = {
+            title: document.getElementById('new-title').value.trim(),
+            category_id: newCategorySelect ? newCategorySelect.value : '',
+            location: document.getElementById('new-location').value.trim(),
+            date: document.getElementById('new-date').value,
+            organizer: document.getElementById('new-organizer').value.trim(),
+            image_url: document.getElementById('new-image').value.trim(),
+            description: document.getElementById('new-description').value.trim()
+        };
+
+        if (!payload.title || !payload.location || !payload.date) {
+            showAdminFeedback('Please fill in the event title, location and date.', false);
+            return;
+        }
+
+        if (addEventBtn) {
+            addEventBtn.disabled = true;
+            addEventBtn.textContent = 'Adding...';
+        }
+
+        fetch(`${API_BASE_URL}/events`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json().then(data => ({ ok: res.ok, data })))
+            .then(({ ok, data }) => {
+                if (!ok) {
+                    throw new Error(data.error || 'Failed to create the event');
+                }
+
+                adminForm.reset();
+                showAdminFeedback(`Event "${data.title}" was added successfully.`, true);
+                filterEvents();
+            })
+            .catch(err => {
+                console.error('Error creating event:', err);
+                showAdminFeedback(`Error: ${err.message}`, false);
+            })
+            .then(() => {
+                if (addEventBtn) {
+                    addEventBtn.disabled = false;
+                    addEventBtn.textContent = 'Add Event';
+                }
+            });
+    }
+
+    // Delete an event through DELETE /api/events/:id
+    // The server refuses (409) to delete an event that still has registrations
+    function deleteEvent(eventId, title) {
+        if (!eventId) return;
+
+        if (!window.confirm(`Delete the event "${title}"? This action cannot be undone.`)) {
+            return;
+        }
+
+        fetch(`${API_BASE_URL}/events/${eventId}`, { method: 'DELETE' })
+            .then(res => res.json().then(data => ({ ok: res.ok, data })))
+            .then(({ ok, data }) => {
+                if (!ok) {
+                    throw new Error(data.error || 'Failed to delete the event');
+                }
+
+                showAdminFeedback(data.message || 'Event deleted successfully.', true);
+                filterEvents();
+            })
+            .catch(err => {
+                console.error('Error deleting event:', err);
+                showAdminFeedback(`Error: ${err.message}`, false);
+                // Refresh so the registration counts stay in sync with the server
+                filterEvents();
+            });
+    }
+
+    // Display a success / error message in the Event Management card
+    function showAdminFeedback(message, isSuccess) {
+        if (!adminFeedback) return;
+
+        adminFeedback.textContent = message;
+        adminFeedback.className = isSuccess ? 'form-response-msg success' : 'form-response-msg error';
+        adminFeedback.hidden = false;
+    }
+
+    // Escape text before it is inserted into HTML
+    function escapeHtml(value) {
+        return String(value === null || value === undefined ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     // Debounce Utility Function for Input Search

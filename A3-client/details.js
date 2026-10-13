@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailContainer = document.getElementById('event-detail-container');
     const registrationsContainer = document.getElementById('registrations-container');
     const registerBtn = document.getElementById('register-btn');
+    const deleteEventBtn = document.getElementById('delete-event-btn');
+    const deleteEventNote = document.getElementById('delete-event-note');
 
     // Extract event ID from URL query string (defaults to ID 1 if unspecified)
     const urlParams = new URLSearchParams(window.location.search);
@@ -24,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(event => {
             renderEventDetails(event);
             renderRegistrations(event.registrations || []);
+            setupDeleteButton(event);
         })
         .catch(err => {
             console.error('Error loading event details:', err);
@@ -34,6 +37,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 registrationsContainer.innerHTML = `<p class="error-msg">Failed to load registrations. ${err.message}</p>`;
             }
         });
+
+    // Delete action for this event.
+    // Rule: an event that already has registrations cannot be deleted.
+    function setupDeleteButton(event) {
+        const registrations = event.registrations || [];
+
+        if (registrations.length > 0) {
+            if (deleteEventBtn) deleteEventBtn.hidden = true;
+            showDeleteNote(`This event already has ${registrations.length} registration${registrations.length !== 1 ? 's' : ''}, so it cannot be deleted.`, false);
+            return;
+        }
+
+        if (deleteEventBtn) {
+            deleteEventBtn.hidden = false;
+            deleteEventBtn.addEventListener('click', () => {
+                if (!window.confirm(`Delete the event "${event.title}"? This action cannot be undone.`)) {
+                    return;
+                }
+
+                deleteEventBtn.disabled = true;
+                deleteEventBtn.textContent = 'Deleting...';
+
+                fetch(`${API_BASE_URL}/events/${eventId}`, { method: 'DELETE' })
+                    .then(res => res.json().then(data => ({ ok: res.ok, data })))
+                    .then(({ ok, data }) => {
+                        if (!ok) {
+                            throw new Error(data.error || 'Failed to delete the event');
+                        }
+
+                        // The event no longer exists, go back to the event list
+                        window.location.href = 'index.html';
+                    })
+                    .catch(err => {
+                        console.error('Error deleting event:', err);
+                        showDeleteNote(`Error: ${err.message}`, true);
+                        deleteEventBtn.disabled = false;
+                        deleteEventBtn.textContent = 'Delete this Event';
+                    });
+            });
+        }
+    }
+
+    // Show a note (or an error message) next to the delete button
+    function showDeleteNote(message, isError) {
+        if (!deleteEventNote) return;
+
+        deleteEventNote.textContent = message;
+        deleteEventNote.className = isError ? 'error-msg' : 'form-hint';
+        deleteEventNote.hidden = false;
+    }
 
     function renderEventDetails(event) {
         if (!detailContainer) return;
