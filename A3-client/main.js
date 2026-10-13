@@ -98,14 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="card-body">
                     <h3 class="card-title">${event.title}</h3>
-                    <div class="card-info">
-                        <span>📍</span>
-                        <span>Location: ${event.location}</span>
-                    </div>
-                    <div class="card-info">
-                        <span>📅</span>
-                        <span>Date: ${event.date}</span>
-                    </div>
+                    <div class="card-info">Location: ${event.location}</div>
+                    <div class="card-info">Date: ${event.date}</div>
                     <div class="card-footer">
                         <a href="details.html?id=${event.event_id}" class="btn-view-details">View Details &rarr;</a>
                     </div>

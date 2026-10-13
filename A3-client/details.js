@@ -44,9 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="detail-content">
                     <span class="badge">${event.category_name || 'Charity Run'}</span>
                     <h2>${event.title}</h2>
-                    <p class="card-info">📍 <strong>Location:</strong> ${event.location}</p>
-                    <p class="card-info">📅 <strong>Date:</strong> ${event.date}</p>
-                    <p class="card-info">🏢 <strong>Organizer:</strong> ${event.organizer || 'Zhejiang Sports Association'}</p>
+                    <p class="card-info"><strong>Location:</strong> ${event.location}</p>
+                    <p class="card-info"><strong>Date:</strong> ${event.date}</p>
+                    <p class="card-info"><strong>Organizer:</strong> ${event.organizer || 'Zhejiang Sports Association'}</p>
                     <div class="description">
                         <h3>Event Overview</h3>
                         <p>${event.description || 'Join us for this exciting community charity run in Zhejiang Province! Promote health, active living, and support local community welfare initiatives.'}</p>
@@ -65,9 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let tableHtml = `
-            <table class="registrations-table" border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px;">
+            <table class="registrations-table">
                 <thead>
-                    <tr style="background-color: #f8f9fa;">
+                    <tr>
                         <th>#</th>
                         <th>Participant Name</th>
                         <th>Email Address</th>

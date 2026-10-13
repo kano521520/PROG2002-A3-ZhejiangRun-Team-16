@@ -1,0 +1,18 @@
+{
+  "name": "prog2002-a3-zhejiangrun-team-16",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PROG2002 Assessment 3 - Zhejiang Community Charity Events Platform (Zhejiang Hope Run)",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "A3-api"
+  ],
+  "scripts": {
+    "start": "npm run start --workspace A3-api",
+    "dev": "npm run start --workspace A3-api",
+    "setup-db": "npm run setup-db --workspace A3-api",
+    "update-db": "npm run update-db --workspace A3-api"
+  }
+}

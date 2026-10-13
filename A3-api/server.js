@@ -10,6 +10,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Serve the static frontend (A3-client) so that http://localhost:3000/ opens the web page
+const clientPath = path.resolve(__dirname, '../A3-client');
+app.use(express.static(clientPath));
+
 // Database Connection
 const dbPath = path.resolve(__dirname, '../db/charity_events.db');
 const db = new sqlite3.Database(dbPath, (err) => {

@@ -92,16 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function showFeedback(message, type) {
         if (!feedbackMsg) return;
         feedbackMsg.textContent = message;
-        feedbackMsg.style.display = 'block';
-
-        if (type === 'success') {
-            feedbackMsg.style.backgroundColor = '#d4edda';
-            feedbackMsg.style.color = '#155724';
-            feedbackMsg.style.border = '1px solid #c3e6cb';
-        } else {
-            feedbackMsg.style.backgroundColor = '#f8d7da';
-            feedbackMsg.style.color = '#721c24';
-            feedbackMsg.style.border = '1px solid #f5c6cb';
-        }
+        // Colours come from style.css (.form-response-msg.success / .error)
+        feedbackMsg.className = 'form-response-msg ' + (type === 'success' ? 'success' : 'error');
+        feedbackMsg.hidden = false;
     }
 });
