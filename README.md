@@ -7,11 +7,79 @@ The application is a full-stack **Zhejiang Community Charity Events Platform**, 
 
 ---
 
+## 🚀 Getting Started (Install & Run)
+
+### 1. Prerequisite
+- Node.js 18+ and npm (verified with Node `v22.22.2` / npm `10.8.1`)
+
+> ⚠️ **Important:** run `npm install` in the **repository root** (the folder containing `package.json` and `README.md`) — **not** inside `A3-client`.
+> The root is configured as an **npm workspace** that owns the backend project `A3-api`, so one `npm install` at the root installs every backend dependency. `A3-client` is plain HTML/CSS/JS and has **no** npm dependencies.
+
+### 2. Install dependencies
+
+```bash
+# Run from the repository root
+npm install
+```
+
+Equivalent alternative (installing the backend directly):
+
+```bash
+cd A3-api
+npm install
+```
+
+### 3. Start the backend API server
+
+```bash
+# Run from the repository root
+npm start
+```
+
+Expected console output:
+
+```text
+Zhejiang Hope Run API server running at http://localhost:3000
+Connected to SQLite database at: <repo>/db/charity_events.db
+SQLite registrations table rebuilt with test data successfully.
+```
+
+### 4. Open the frontend
+
+The API server also hosts the frontend, so simply open:
+
+```text
+http://localhost:3000/
+```
+
+That renders `A3-client/index.html` (event list, filter/search, details and registration pages are all served from the same origin).
+
+Alternative: open `A3-client/index.html` directly in a browser, or serve the folder with a static server such as VS Code "Live Server" — the client calls `http://localhost:3000/api` and CORS is enabled, so both ways work.
+
+### 5. Optional database scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run setup-db` | Re-creates the `categories` / `events` tables and re-seeds the sample events |
+| `npm run update-db` | Migrates the `image_url` values of existing events |
+
+### Available API endpoints
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/categories` | List all event categories |
+| GET | `/api/events` | List events (supports `?category_id=` and `?location=`) |
+| GET | `/api/events/:id` | Single event detail plus its registrations |
+| POST | `/api/registrations` | Submit a registration (JSON: `event_id`, `user_name`, `user_email`, `contact_number`, `tickets_purchased`) |
+
+---
+
 ## 📂 Repository Structure
 
 ```text
 PROG2002-A3-ZhejiangRun-Team-16/
 │
+├── package.json            # npm workspace root (run "npm install" / "npm start" here)
 ├── A3-api/                 # Backend Node.js & Express RESTful API server
 │   ├── server.js           # Main server entry & API routing (Events & Registrations)
 │   ├── setup-db.js         # Database initialization & table creation script
