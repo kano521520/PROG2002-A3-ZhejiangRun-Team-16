@@ -1,0 +1,49 @@
+<div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 20px auto; padding: 20px;">
+  <header style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;">
+    <h1>{{ title }}</h1>
+    <p>Powered by Angular & TypeScript + Real-time Weather API</p>
+  </header>
+
+  <div style="display: flex; gap: 20px;">
+    <!-- Event List -->
+    <div style="flex: 1;">
+      <h2>Charity Events</h2>
+      <div *ngFor="let event of events" (click)="selectEvent(event)" 
+           style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer;">
+        <h3>{{ event.title }}</h3>
+        <p><strong>Location:</strong> {{ event.location }}</p>
+        <p><strong>Date:</strong> {{ event.date }}</p>
+        
+        <!-- Live Weather Widget -->
+        <div *ngIf="weatherMap[event.location]" style="background: #eef7ff; padding: 8px; border-radius: 5px; font-size: 0.9em; margin-top: 10px;">
+          🌤️ Weather in {{ event.location }}: {{ weatherMap[event.location].temperature }} ({{ weatherMap[event.location].condition }})
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div style="flex: 1; border: 1px solid #ccc; padding: 20px; border-radius: 8px;" *ngIf="selectedEvent">
+      <h2>Register for: {{ selectedEvent.title }}</h2>
+      <form (ngSubmit)="submit()">
+        <div style="margin-bottom: 10px;">
+          <label>Your Name:</label>
+          <input type="text" [(ngModel)]="userName" name="userName" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <label>Email:</label>
+          <input type="email" [(ngModel)]="userEmail" name="userEmail" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <label>Contact Number:</label>
+          <input type="text" [(ngModel)]="contactNumber" name="contactNumber" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 10px;">
+          <label>Tickets:</label>
+          <input type="number" [(ngModel)]="tickets" name="tickets" min="1" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+        </div>
+        <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%;">Submit Registration</button>
+      </form>
+      <p *ngIf="message" style="margin-top: 15px; font-weight: bold;">{{ message }}</p>
+    </div>
+  </div>
+</div>
