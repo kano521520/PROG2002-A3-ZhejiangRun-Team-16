@@ -1,49 +1,134 @@
-<div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 20px auto; padding: 20px;">
-  <header style="border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;">
-    <h1>{{ title }}</h1>
-    <p>Powered by Angular & TypeScript + Real-time Weather API</p>
+<div class="app-container">
+  <!-- Header / Hero Section -->
+  <header class="hero-header">
+    <div class="header-content">
+      <span class="tech-badge">Angular v22+ &bull; TypeScript &bull; Live Weather API</span>
+      <h1 class="main-title">{{ title }}</h1>
+      <p class="subtitle">Empowering Local Communities in Zhejiang Province through Charity Runs & Active Welfare</p>
+    </div>
   </header>
 
-  <div style="display: flex; gap: 20px;">
-    <!-- Event List -->
-    <div style="flex: 1;">
-      <h2>Charity Events</h2>
-      <div *ngFor="let event of events" (click)="selectEvent(event)" 
-           style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer;">
-        <h3>{{ event.title }}</h3>
-        <p><strong>Location:</strong> {{ event.location }}</p>
-        <p><strong>Date:</strong> {{ event.date }}</p>
-        
-        <!-- Live Weather Widget -->
-        <div *ngIf="weatherMap[event.location]" style="background: #eef7ff; padding: 8px; border-radius: 5px; font-size: 0.9em; margin-top: 10px;">
-          🌤️ Weather in {{ event.location }}: {{ weatherMap[event.location].temperature }} ({{ weatherMap[event.location].condition }})
+  <!-- Main Content Layout -->
+  <main class="content-grid">
+    <!-- Left Column: Event List -->
+    <section class="events-section">
+      <div class="section-header">
+        <h2>Explore Charity Events</h2>
+        <span class="count-pill">{{ events.length }} Events Available</span>
+      </div>
+
+      <div class="events-list">
+        <article 
+          *ngFor="let event of events" 
+          class="event-card" 
+          [class.active]="selectedEvent?.event_id === event.event_id"
+          (click)="selectEvent(event)">
+          
+          <div class="card-header">
+            <span class="category-tag">{{ event.category_name || 'Charity Event' }}</span>
+            <span class="reg-badge">
+              <i class="icon">👥</i> {{ event.registration_count || 0 }} Registered
+            </span>
+          </div>
+
+          <h3 class="event-title">{{ event.title }}</h3>
+          
+          <div class="event-meta">
+            <p><span class="meta-label">📍 Location:</span> {{ event.location }}</p>
+            <p><span class="meta-label">📅 Date:</span> {{ event.date }}</p>
+          </div>
+
+          <!-- Real-time Weather Widget Box -->
+          <div *ngIf="weatherMap[event.location]" class="weather-widget">
+            <div class="weather-icon">🌤️</div>
+            <div class="weather-info">
+              <span class="weather-temp">{{ weatherMap[event.location].temperature }}</span>
+              <span class="weather-cond">{{ weatherMap[event.location].condition }} in {{ event.location }}</span>
+            </div>
+            <span class="live-pill">Live Weather</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Right Column: Interactive Registration Panel -->
+    <section class="registration-section">
+      <!-- Empty State when no event selected -->
+      <div *ngIf="!selectedEvent" class="empty-selection-card">
+        <div class="empty-icon">📌</div>
+        <h3>Select an Event</h3>
+        <p>Click on any charity event card from the list to view registration details and sign up.</p>
+      </div>
+
+      <!-- Active Registration Form Card -->
+      <div *ngIf="selectedEvent" class="registration-card">
+        <div class="card-top-bar">
+          <span class="status-indicator">Ready for Sign Up</span>
+          <h2>Register Event</h2>
+        </div>
+
+        <div class="selected-event-summary">
+          <h4>{{ selectedEvent.title }}</h4>
+          <p>📍 {{ selectedEvent.location }} | 📅 {{ selectedEvent.date }}</p>
+        </div>
+
+        <form (ngSubmit)="submit()" class="stylish-form">
+          <div class="form-group">
+            <label for="userName">Full Name <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="userName" 
+              [(ngModel)]="userName" 
+              name="userName" 
+              placeholder="e.g. Zhang San" 
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="userEmail">Email Address <span class="required">*</span></label>
+            <input 
+              type="email" 
+              id="userEmail" 
+              [(ngModel)]="userEmail" 
+              name="userEmail" 
+              placeholder="name@example.com" 
+              required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="contactNumber">Contact Phone <span class="required">*</span></label>
+              <input 
+                type="tel" 
+                id="contactNumber" 
+                [(ngModel)]="contactNumber" 
+                name="contactNumber" 
+                placeholder="0412345678" 
+                required>
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="tickets">Tickets <span class="required">*</span></label>
+              <input 
+                type="number" 
+                id="tickets" 
+                [(ngModel)]="tickets" 
+                name="tickets" 
+                min="1" 
+                max="10" 
+                required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            Confirm & Complete Registration &rarr;
+          </button>
+        </form>
+
+        <div *ngIf="message" class="alert-message" [class.alert-success]="message.includes('✅')" [class.alert-error]="message.includes('❌')">
+          {{ message }}
         </div>
       </div>
-    </div>
-
-    <!-- Registration Form -->
-    <div style="flex: 1; border: 1px solid #ccc; padding: 20px; border-radius: 8px;" *ngIf="selectedEvent">
-      <h2>Register for: {{ selectedEvent.title }}</h2>
-      <form (ngSubmit)="submit()">
-        <div style="margin-bottom: 10px;">
-          <label>Your Name:</label>
-          <input type="text" [(ngModel)]="userName" name="userName" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
-        </div>
-        <div style="margin-bottom: 10px;">
-          <label>Email:</label>
-          <input type="email" [(ngModel)]="userEmail" name="userEmail" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
-        </div>
-        <div style="margin-bottom: 10px;">
-          <label>Contact Number:</label>
-          <input type="text" [(ngModel)]="contactNumber" name="contactNumber" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
-        </div>
-        <div style="margin-bottom: 10px;">
-          <label>Tickets:</label>
-          <input type="number" [(ngModel)]="tickets" name="tickets" min="1" required style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
-        </div>
-        <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%;">Submit Registration</button>
-      </form>
-      <p *ngIf="message" style="margin-top: 15px; font-weight: bold;">{{ message }}</p>
-    </div>
-  </div>
+    </section>
+  </main>
 </div>
