@@ -150,4 +150,4 @@ PROG2002-A3-ZhejiangRun-Team-16/
 | Team Member | Primary Roles & Key Contributions | Contribution % |
 | --- | --- | --- |
 | **Xuanhao Zhang** | Angular v22+ SPA Architecture Migration, TypeScript Interface Modeling, `ApiService` Weather Integration, Express Weather Proxy Route Refactoring. | **60%** |
-| **Team Member** | Event Management API Testing, Database Integrity Verification, Baseline UI Styling, Report Documentation & Video Demo Recording. | **40%** |
+| **Zhaoze Sun** | Event Management API Testing, Database Integrity Verification, Baseline UI Styling, Report Documentation & Video Demo Recording. | **40%** |
