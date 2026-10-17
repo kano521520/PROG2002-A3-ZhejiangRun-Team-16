@@ -13,6 +13,63 @@
   padding: 30px 20px 60px;
 }
 
+/* Unified page switcher (MainPage / RegisterPage / Derive Page) */
+.page-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.page-switcher-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.page-switcher-link:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.page-switcher-link.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.page-switcher-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.page-switcher-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+  .page-switcher-link {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
 /* Hero Header */
 .hero-header {
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -170,10 +227,6 @@
   gap: 12px;
 }
 
-.weather-icon {
-  font-size: 1.4rem;
-}
-
 .weather-info {
   display: flex;
   flex-direction: column;
@@ -220,11 +273,6 @@
   text-align: center;
   padding: 50px 20px;
   color: #64748b;
-}
-
-.empty-icon {
-  font-size: 2.5rem;
-  margin-bottom: 12px;
 }
 
 .card-top-bar {

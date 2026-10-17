@@ -14,7 +14,7 @@ import { CharityEvent, WeatherInfo } from './models';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'Zhejiang Charity Events (Angular SPA)';
+  title = 'Derive Page';
   events: CharityEvent[] = [];
   weatherMap: { [key: string]: WeatherInfo } = {};
   selectedEvent: CharityEvent | null = null;
@@ -24,6 +24,7 @@ export class AppComponent implements OnInit {
   contactNumber = '';
   tickets = 1;
   message = '';
+  messageType: 'success' | 'error' | '' = '';
 
   constructor(private apiService: ApiService) {}
 
@@ -45,6 +46,7 @@ export class AppComponent implements OnInit {
   selectEvent(event: CharityEvent): void {
     this.selectedEvent = event;
     this.message = '';
+    this.messageType = '';
   }
 
   submit(): void {
@@ -59,11 +61,13 @@ export class AppComponent implements OnInit {
 
     this.apiService.submitRegistration(payload).subscribe({
       next: (res) => {
-        this.message = '✅ ' + res.message;
+        this.message = res.message;
+        this.messageType = 'success';
         this.loadEvents();
       },
       error: (err) => {
-        this.message = '❌ ' + (err.error?.error || 'Registration failed');
+        this.message = err.error?.error || 'Registration failed';
+        this.messageType = 'error';
       }
     });
   }

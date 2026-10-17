@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'A3-angular-client' title`, () => {
+  it(`should have the 'Derive Page' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('A3-angular-client');
+    expect(app.title).toEqual('Derive Page');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, A3-angular-client');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Derive Page');
   });
 });
